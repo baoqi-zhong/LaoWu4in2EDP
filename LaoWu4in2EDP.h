@@ -85,10 +85,8 @@ public:
     void SendData(unsigned char data);
     void WaitUntilIdle(void);
     void Reset(void);
-    void SetPartialWindow(const unsigned char* buffer_black, const unsigned char* buffer_red, int x, int y, int w, int l);
-    void SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y, int w, int l);
-    void SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int w, int l);
-    void DisplayFrame(const unsigned char* frame_black, const unsigned char* frame_red);
+    void SetPartialWindow(const unsigned char* buffer, int x, int y, int w, int l);
+    void DisplayFrame(const unsigned char* frame);
     void DisplayFrame(void);
     void ClearFrame(void);
     void Sleep(void);

@@ -96,69 +96,11 @@ void Epd::Reset(void) {
     DelayMs(200);   
 }
 
-/**
- *  @brief: transmit partial data to the SRAM
- */
-void Epd::SetPartialWindow(const unsigned char* buffer_black, const unsigned char* buffer_red, int x, int y, int w, int l) {
-    SendCommand(PARTIAL_IN);
-    SendCommand(PARTIAL_WINDOW);
-    SendData(x >> 8);
-    SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
-    SendData(((x & 0xf8) + w  - 1) >> 8);
-    SendData(((x & 0xf8) + w  - 1) | 0x07);
-    SendData(y >> 8);        
-    SendData(y & 0xff);
-    SendData((y + l - 1) >> 8);        
-    SendData((y + l - 1) & 0xff);
-    SendData(0x01);         // Gates scan both inside and outside of the partial window. (default) 
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_1);
-    if (buffer_black != NULL) {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_black[i]);  
-        }  
-    }
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_2);
-    if (buffer_red != NULL) {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_red[i]);  
-        }  
-    }
-    DelayMs(2);
-    SendCommand(PARTIAL_OUT);  
-}
-
-/**
- *  @brief: transmit partial data to the black part of SRAM
- */
-void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y, int w, int l) {
-    SendCommand(PARTIAL_IN);
-    SendCommand(PARTIAL_WINDOW);
-    SendData(x >> 8);
-    SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
-    SendData(((x & 0xf8) + w  - 1) >> 8);
-    SendData(((x & 0xf8) + w  - 1) | 0x07);
-    SendData(y >> 8);        
-    SendData(y & 0xff);
-    SendData((y + l - 1) >> 8);        
-    SendData((y + l - 1) & 0xff);
-    SendData(0x01);         // Gates scan both inside and outside of the partial window. (default) 
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_1);
-    if (buffer_black != NULL) {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_black[i]);  
-        }  
-    }
-    DelayMs(2);
-    SendCommand(PARTIAL_OUT);  
-}
 
 /**
  *  @brief: transmit partial data to the red part of SRAM
  */
-void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int w, int l) {
+void Epd::SetPartialWindow(const unsigned char* buffer, int x, int y, int w, int l) {
     SendCommand(PARTIAL_IN);
     SendCommand(PARTIAL_WINDOW);
     SendData(x >> 8);
@@ -172,9 +114,9 @@ void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int
     SendData(0x01);         // Gates scan both inside and outside of the partial window. (default) 
     DelayMs(2);
     SendCommand(DATA_START_TRANSMISSION_2);
-    if (buffer_red != NULL) {
+    if (buffer != NULL) {
         for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_red[i]);  
+            SendData(buffer[i]);  
         }  
     }
     DelayMs(2);
@@ -184,23 +126,16 @@ void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int
 /**
  * @brief: refresh and displays the frame
  */
-void Epd::DisplayFrame(const unsigned char* frame_black, const unsigned char* frame_red) {
-    if (frame_black != NULL) {
-        SendCommand(DATA_START_TRANSMISSION_1);
-        DelayMs(2);
-        for (int i = 0; i < this->width / 8 * this->height; i++) {
-            SendData(pgm_read_byte(&frame_black[i]));
-        }
-        DelayMs(2);
-    }
-    if (frame_red != NULL) {
+void Epd::DisplayFrame(const unsigned char* frame) {
+    if (frame != NULL) {
         SendCommand(DATA_START_TRANSMISSION_2);
         DelayMs(2);
         for (int i = 0; i < this->width / 8 * this->height; i++) {
-            SendData(pgm_read_byte(&frame_red[i]));
+            SendData(pgm_read_byte(&frame[i]));
         }
         DelayMs(2);
     }
+
     SendCommand(DISPLAY_REFRESH);
     WaitUntilIdle();
 }
